@@ -220,5 +220,6 @@ const findDrawUp = function (data) {
   return max.toFixed(4);
 };
 
+// run functions
 highestAnnual("test_returns.csv");
 highestDrawUp("test_returns.csv");
