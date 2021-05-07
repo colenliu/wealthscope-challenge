@@ -15,47 +15,53 @@ new csv file in which each row contains the stock's highest return in
 each year. The output file should have three columns with "ticker",
 "year", and "highest_return" as the headers.
 
-// [[“AAPL”,”2019-01-31”,”0.0552”],[“AAPL”,”2019-02-28”,”0.0448”],[“AAPL”,”2019-03-31”,”0.097”]]
+SAMPLE SUBSET: [[“AAPL”,”2019-01-31”,”0.0552”],[“AAPL”,”2019-02-28”,”0.0448”],[“AAPL”,”2019-03-31”,”0.097”]]
 
+ii. Write a program that reads the data from the csv file and creates a new csv file 
+in which each row contains a stock's maximum draw-up for each year. A maximum draw-up is 
+the maximum observed gain from a trough to a peak. Given the three rows in the sample subset, 
+the csv file should contain AAPL,2019,0.197.
 
- * ii. Write a program that reads the data from the csv file and creates a new csv file in which each row contains a stock's maximum draw-up for each year. A maximum draw-up is the maximum observed gain from a trough to a peak.
-Given the three rows in the sample subset, the csv file should contain AAPL,2019,0.197.
  */
+
 const csv = require("csv-parser");
 const fs = require("fs");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
-const csvWriter = createCsvWriter({
-  path: "max_returns.csv",
-  header: [
-    { id: "name", title: "Name" },
-    { id: "year", title: "Year" },
-    { id: "price", title: "Price" },
-  ],
+// template for CSV headers
+const HEADER_TEMPLATE = [
+  { id: "name", title: "Name" },
+  { id: "year", title: "Year" },
+  { id: "price", title: "Price" },
+];
+
+// CSV writer for highest monthly return
+const csvWriterAnnual = createCsvWriter({
+  path: "max_annual.csv",
+  header: HEADER_TEMPLATE,
 });
 
-const csvWriter2 = createCsvWriter({
+// CSV writer for maximum draw-up
+const csvWriterDrawUp = createCsvWriter({
   path: "max_drawups.csv",
-  header: [
-    { id: "name", title: "Name" },
-    { id: "year", title: "Year" },
-    { id: "price", title: "Price" },
-  ],
+  header: HEADER_TEMPLATE,
 });
 
 /**
- *
- * @param {*} csvData
+ * Generates a max_annual CSV file that illustrates highest monthly return
+ * for each company in each year.
+ * @param {string} csvData path for CSV file from which to import data from.
  */
 const highestAnnual = function (csvData) {
   const results = [];
   let obj = {};
+  let arr = [];
 
   fs.createReadStream(csvData)
     .pipe(csv())
     .on("data", (data) => results.push(data))
     .on("end", () => {
-      // TODO: change to uniqueCompany and uniqueName
+      // constant for all unique company and year combinations
       const unique = [
         ...new Set(
           results.map(
@@ -64,8 +70,7 @@ const highestAnnual = function (csvData) {
         ),
       ];
 
-      let arr = [];
-
+      // separates data by company and year
       for (x = 0; x < unique.length; x++) {
         let newTicker = JSON.stringify(unique[x]).substring(1, 5);
         let newDate = JSON.stringify(unique[x]).substring(5, 9);
@@ -79,10 +84,11 @@ const highestAnnual = function (csvData) {
         arr.push(test2);
       }
 
+      // pushes max for each company and year into array
       let allMaxes = [];
 
       for (let i = 0; i < arr.length; i++) {
-        allMaxes.push(findMax(arr[i], arr.length));
+        allMaxes.push(findAnnualMax(arr[i]));
 
         for (let j = 0; j < arr[i].length; j++) {
           let ticker = arr[i][j][`ticker`];
@@ -94,6 +100,7 @@ const highestAnnual = function (csvData) {
         }
       }
 
+      // fix formatting of data to be written into CSV file
       let newObj = Object.keys(obj).reduce((acc, curr) => {
         let name = JSON.stringify(curr).substring(1, 5);
         let year = JSON.stringify(curr).substring(5, 9);
@@ -101,25 +108,29 @@ const highestAnnual = function (csvData) {
         return [...acc, { name: name, year: year, price: obj[curr] }];
       }, []);
 
-      csvWriter
+      // write into CSV file
+      csvWriterAnnual
         .writeRecords(newObj)
-        .then(() => console.log("The CSV file was written successfully"));
+        .then(() => console.log("max_annual.csv file created successfully!"));
     });
 };
 
 /**
- *
- * @param {*} csvData
+ * Generates a max_returns CSV file that illustrates the maximum draw-up
+ * (i.e. highest possible profit for buying and selling)
+ * for each company in each year.
+ * @param {string} csvData path for CSV file from which to import data from.
  */
 const highestDrawUp = function (csvData) {
   const results = [];
   let obj = {};
+  let arr = [];
 
   fs.createReadStream(csvData)
     .pipe(csv())
     .on("data", (data) => results.push(data))
     .on("end", () => {
-      // TODO: change to uniqueCompany and uniqueName
+      // constant for all unique company and year combinations
       const unique = [
         ...new Set(
           results.map(
@@ -128,8 +139,7 @@ const highestDrawUp = function (csvData) {
         ),
       ];
 
-      let arr = [];
-
+      // separates data by company and year
       for (x = 0; x < unique.length; x++) {
         let newTicker = JSON.stringify(unique[x]).substring(1, 5);
         let newDate = JSON.stringify(unique[x]).substring(5, 9);
@@ -143,6 +153,7 @@ const highestDrawUp = function (csvData) {
         arr.push(test2);
       }
 
+      // pushes max for each company and year into array
       let allMaxes = [];
 
       for (let i = 0; i < arr.length; i++) {
@@ -158,6 +169,7 @@ const highestDrawUp = function (csvData) {
         }
       }
 
+      // fix formatting of data to be written into CSV file
       let newObj = Object.keys(obj).reduce((acc, curr) => {
         let name = JSON.stringify(curr).substring(1, 5);
         let year = JSON.stringify(curr).substring(5, 9);
@@ -165,19 +177,19 @@ const highestDrawUp = function (csvData) {
         return [...acc, { name: name, year: year, price: obj[curr] }];
       }, []);
 
-      csvWriter2
+      // write into CSV file
+      csvWriterDrawUp
         .writeRecords(newObj)
-        .then(() => console.log("The CSV file was written successfully"));
+        .then(() => console.log("max_drawups.csv file created successfully!"));
     });
 };
 
 /**
- *
- * @param {*} data
- * @param {*} arrLength
- * @returns max
+ * Helper function to find highest monthly return for a company in a given year.
+ * @param {Object} data stock data for specific company and year
+ * @returns highest monthly return
  */
-const findMax = function (data, arrLength) {
+const findAnnualMax = function (data) {
   let max = Number.MIN_VALUE;
 
   for (let i = 0; i < data.length; i++) {
@@ -188,9 +200,9 @@ const findMax = function (data, arrLength) {
 };
 
 /**
- *
- * @param {*} data
- * @returns
+ * Helper function to find maximum draw-up for a company in a given year.
+ * @param {Object} data stock data for specific company and year
+ * @returns highest maximum draw-up
  */
 const findDrawUp = function (data) {
   let max = 0;
