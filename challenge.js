@@ -185,7 +185,7 @@ const highestDrawUp = function (csvData) {
 };
 
 /**
- * Helper function to find highest monthly return for a company in a given year.
+ * Helper function to find the highest monthly return for a company in a given year.
  * @param {Object} data stock data for specific company and year
  * @returns highest monthly return
  */
@@ -200,7 +200,7 @@ const findAnnualMax = function (data) {
 };
 
 /**
- * Helper function to find maximum draw-up for a company in a given year.
+ * Helper function to find the maximum draw-up for a company in a given year.
  * @param {Object} data stock data for specific company and year
  * @returns highest maximum draw-up
  */
