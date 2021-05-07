@@ -2,7 +2,7 @@
 A technical challenge from WealthScope.
 
 ### HOW TO RUN:
-1. In the project root directory, input the following command on a terminal to install necessary packges:
+1. In the project root directory, input the following command on a terminal to install necessary packages:
 ```
 npm install
 ```
