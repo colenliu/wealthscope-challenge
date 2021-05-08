@@ -28,13 +28,6 @@ const csv = require("csv-parser");
 const fs = require("fs");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
-// template for CSV headers
-const HEADER_TEMPLATE = [
-  { id: "name", title: "Name" },
-  { id: "year", title: "Year" },
-  { id: "price", title: "Price" },
-];
-
 /**
  * Generates a CSV file that illustrates highest monthly return
  * for each company in each year or maximum draw-up for each company in given year.
@@ -43,85 +36,94 @@ const HEADER_TEMPLATE = [
  * drawup = maximum drawups)
  */
 const generateStockReport = function (csvData, reportType) {
-  const fileData = [];
-  let unformattedAnnuals = {};
-  let filteredCompanyData = [];
+  try {
+    const fileData = [];
+    let unformattedStockData = {};
+    let filteredCompanyData = [];
 
-  // handle errors
-  if (!reportType || (reportType !== "annual" && reportType !== "drawup")) {
-    console.log("Please provide valid reportType parameter.");
-    return;
-  }
+    // handle error cases (incorrect/missing reportType param)
+    if (!reportType || (reportType !== "annual" && reportType !== "drawup")) {
+      console.log("Please provide valid reportType parameter.");
+      return;
+    }
 
-  fs.createReadStream(csvData)
-    .pipe(csv())
-    .on("data", (data) => fileData.push(data))
-    .on("end", () => {
-      // constant for all unique company and year combinations
-      const unique = [
-        ...new Set(
-          fileData.map(
-            (result) => result[`ticker`] + result[`date`].substring(0, 4)
-          )
-        ),
-      ];
+    fs.createReadStream(csvData)
+      .pipe(csv())
+      .on("data", (data) => fileData.push(data))
+      .on("end", () => {
+        // constant for all unique company and year combinations
+        const unique = [
+          ...new Set(
+            fileData.map(
+              (result) => result[`ticker`] + result[`date`].substring(0, 4)
+            )
+          ),
+        ];
 
-      // separates data by company and year
-      for (x = 0; x < unique.length; x++) {
-        let newTicker = JSON.stringify(unique[x]).substring(1, 5);
-        let newDate = JSON.stringify(unique[x]).substring(5, 9);
-        let filteredCompanyYear = fileData.filter(function (v, i) {
-          return (
-            v["ticker"] == `${newTicker}` &&
-            v[`date`].substring(0, 4) == `${newDate}`
-          );
-        });
+        // separates data by company and year
+        for (x = 0; x < unique.length; x++) {
+          let newTicker = JSON.stringify(unique[x]).substring(1, 5);
+          let newDate = JSON.stringify(unique[x]).substring(5, 9);
+          let filteredCompanyYear = fileData.filter(function (v, i) {
+            return (
+              v["ticker"] === `${newTicker}` &&
+              v[`date`].substring(0, 4) === `${newDate}`
+            );
+          });
 
-        filteredCompanyData.push(filteredCompanyYear);
-      }
+          filteredCompanyData.push(filteredCompanyYear);
+        }
 
-      // pushes desired max values for each company in given year to array
-      let allMaxes = [];
+        // pushes desired max values for each company in given year to array
+        let allMaxes = [];
 
-      for (let i = 0; i < filteredCompanyData.length; i++) {
-        reportType === "annual"
-          ? allMaxes.push(findAnnualMax(filteredCompanyData[i]))
-          : allMaxes.push(findDrawUp(filteredCompanyData[i]));
+        for (let i = 0; i < filteredCompanyData.length; i++) {
+          reportType === "annual"
+            ? allMaxes.push(findAnnualMax(filteredCompanyData[i]))
+            : allMaxes.push(findDrawUp(filteredCompanyData[i]));
 
-        for (let j = 0; j < filteredCompanyData[i].length; j++) {
-          let ticker = filteredCompanyData[i][j][`ticker`];
-          let year = filteredCompanyData[i][j][`date`].substring(0, 4);
+          for (let j = 0; j < filteredCompanyData[i].length; j++) {
+            let ticker = filteredCompanyData[i][j][`ticker`];
+            let year = filteredCompanyData[i][j][`date`].substring(0, 4);
 
-          if (!unformattedAnnuals.hasOwnProperty(`${ticker}${year}`)) {
-            unformattedAnnuals[`${ticker}${year}`] = allMaxes[i];
+            if (!unformattedStockData.hasOwnProperty(`${ticker}${year}`)) {
+              unformattedStockData[`${ticker}${year}`] = allMaxes[i];
+            }
           }
         }
-      }
 
-      // fix formatting of data to be written into CSV file
-      const formattedAnnuals = Object.keys(unformattedAnnuals).reduce(
-        (acc, curr) => {
-          let name = JSON.stringify(curr).substring(1, 5);
-          let year = JSON.stringify(curr).substring(5, 9);
+        // fix formatting of data to be written into CSV file
+        const formattedStockData = Object.keys(unformattedStockData).reduce(
+          (acc, curr) => {
+            let name = JSON.stringify(curr).substring(1, 5);
+            let year = JSON.stringify(curr).substring(5, 9);
 
-          return [
-            ...acc,
-            { name: name, year: year, price: unformattedAnnuals[curr] },
-          ];
-        },
-        []
-      );
+            return [
+              ...acc,
+              { name: name, year: year, price: unformattedStockData[curr] },
+            ];
+          },
+          []
+        );
 
-      // write into corresponding CSV files
-      createCsvWriter({
-        path: `${
-          reportType === "annual" ? "max_annual.csv" : "max_drawups.csv"
-        }`,
-        header: HEADER_TEMPLATE,
-      })
-        .writeRecords(formattedAnnuals)
-        .then(() => console.log("CSV file created successfully!"));
-    });
+        // write data into corresponding CSV files
+        createCsvWriter({
+          path: `${
+            reportType === "annual" ? "max_annual.csv" : "max_drawups.csv"
+          }`,
+          header: [
+            { id: "name", title: "Name" },
+            { id: "year", title: "Year" },
+            { id: "price", title: "Price" },
+          ],
+        })
+          .writeRecords(formattedStockData)
+          .then(() => console.log("CSV file created successfully!"));
+      });
+  } catch (err) {
+    console.log("generateStockReport() has failed to run.");
+    return;
+  }
 };
 
 /**
