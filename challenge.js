@@ -48,11 +48,13 @@ const csvWriterDrawUp = createCsvWriter({
 });
 
 /**
- * Generates a max_annual CSV file that illustrates highest monthly return
- * for each company in each year.
- * @param {string} csvData path for CSV file from which to import data from.
+ * Generates a CSV file that illustrates highest monthly return
+ * for each company in each year or maximum draw-up for each company in given year.
+ * @param {String} csvData path for CSV file from which to import data from.
+ * @param {String} type desired type for generated CSV (annual = highest monthly,
+ * drawup = maximum drawups)
  */
-const highestAnnual = function (csvData) {
+const highestGeneric = function (csvData, type) {
   const fileData = [];
   let unformattedAnnuals = {};
   let filteredCompanyData = [];
@@ -84,11 +86,15 @@ const highestAnnual = function (csvData) {
         filteredCompanyData.push(filteredCompanyYear);
       }
 
-      // pushes max for each company and year into array
+      // pushes desired max values for each company in given year to array
       let allMaxes = [];
 
       for (let i = 0; i < filteredCompanyData.length; i++) {
-        allMaxes.push(findAnnualMax(filteredCompanyData[i]));
+        if (type === "annual")
+          allMaxes.push(findAnnualMax(filteredCompanyData[i]));
+
+        if (type === "drawup")
+          allMaxes.push(findDrawUp(filteredCompanyData[i]));
 
         for (let j = 0; j < filteredCompanyData[i].length; j++) {
           let ticker = filteredCompanyData[i][j][`ticker`];
@@ -101,7 +107,7 @@ const highestAnnual = function (csvData) {
       }
 
       // fix formatting of data to be written into CSV file
-      let formattedData = Object.keys(unformattedAnnuals).reduce(
+      const formattedAnnuals = Object.keys(unformattedAnnuals).reduce(
         (acc, curr) => {
           let name = JSON.stringify(curr).substring(1, 5);
           let year = JSON.stringify(curr).substring(5, 9);
@@ -114,85 +120,13 @@ const highestAnnual = function (csvData) {
         []
       );
 
-      // write into CSV file
-      csvWriterAnnual
-        .writeRecords(formattedData)
-        .then(() => console.log("max_annual.csv file created successfully!"));
-    });
-};
-
-/**
- * Generates a max_returns CSV file that illustrates the maximum draw-up
- * (i.e. highest possible profit for buying and selling)
- * for each company in each year.
- * @param {string} csvData path for CSV file from which to import data from.
- */
-const highestDrawUp = function (csvData) {
-  const fileData = [];
-  let unformattedDrawUps = {};
-  let filteredCompanyData = [];
-
-  fs.createReadStream(csvData)
-    .pipe(csv())
-    .on("data", (data) => fileData.push(data))
-    .on("end", () => {
-      // constant for all unique company and year combinations
-      const unique = [
-        ...new Set(
-          fileData.map(
-            (result) => result[`ticker`] + result[`date`].substring(0, 4)
-          )
-        ),
-      ];
-
-      // separates data by company and year
-      for (x = 0; x < unique.length; x++) {
-        let newTicker = JSON.stringify(unique[x]).substring(1, 5);
-        let newDate = JSON.stringify(unique[x]).substring(5, 9);
-        let filteredCompanyYear = fileData.filter(function (v, i) {
-          return (
-            v["ticker"] == `${newTicker}` &&
-            v[`date`].substring(0, 4) == `${newDate}`
-          );
-        });
-
-        filteredCompanyData.push(filteredCompanyYear);
-      }
-
-      // pushes max for each company and year into array
-      let allMaxes = [];
-
-      for (let i = 0; i < filteredCompanyData.length; i++) {
-        allMaxes.push(findDrawUp(filteredCompanyData[i]));
-
-        for (let j = 0; j < filteredCompanyData[i].length; j++) {
-          let ticker = filteredCompanyData[i][j][`ticker`];
-          let year = filteredCompanyData[i][j][`date`].substring(0, 4);
-
-          if (!unformattedDrawUps.hasOwnProperty(`${ticker}${year}`)) {
-            unformattedDrawUps[`${ticker}${year}`] = allMaxes[i];
-          }
-        }
-      }
-
-      // fix formatting of data to be written into CSV file
-      let formattedData = Object.keys(unformattedDrawUps).reduce(
-        (acc, curr) => {
-          let name = JSON.stringify(curr).substring(1, 5);
-          let year = JSON.stringify(curr).substring(5, 9);
-
-          return [
-            ...acc,
-            { name: name, year: year, price: unformattedDrawUps[curr] },
-          ];
-        },
-        []
-      );
-
-      // write into CSV file
-      csvWriterDrawUp
-        .writeRecords(formattedData)
-        .then(() => console.log("max_drawups.csv file created successfully!"));
+      // write into corresponding CSV files
+      createCsvWriter({
+        path: `${type === "annual" ? "max_annual.csv" : "max_drawups.csv"}`,
+        header: HEADER_TEMPLATE,
+      })
+        .writeRecords(formattedAnnuals)
+        .then(() => console.log("CSV file created successfully!"));
     });
 };
 
@@ -233,5 +167,5 @@ const findDrawUp = function (data) {
 };
 
 // run functions
-highestAnnual("test_returns.csv");
-highestDrawUp("test_returns.csv");
+highestGeneric("test_returns.csv", "annual");
+highestGeneric("test_returns.csv", "drawup");
