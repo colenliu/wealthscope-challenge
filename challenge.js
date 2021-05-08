@@ -62,7 +62,7 @@ const generateStockReport = function (csvData, reportType) {
           ),
         ];
 
-        // groups data by company and year
+        // group data by company and year
         for (x = 0; x < companyYearCombos.length; x++) {
           let newTicker = JSON.stringify(companyYearCombos[x]).substring(1, 5);
           let newDate = JSON.stringify(companyYearCombos[x]).substring(5, 9);
@@ -81,7 +81,7 @@ const generateStockReport = function (csvData, reportType) {
 
         for (let i = 0; i < groupedCompanyData.length; i++) {
           reportType === "annual"
-            ? allMaxes.push(findAnnualMax(groupedCompanyData[i]))
+            ? allMaxes.push(findHighestMonthly(groupedCompanyData[i]))
             : allMaxes.push(findDrawUp(groupedCompanyData[i]));
 
           // creates object containing desired company name, year, and desired max value
@@ -138,7 +138,7 @@ const generateStockReport = function (csvData, reportType) {
  * @param {Object} data stock data for specific company and year
  * @returns highest monthly return
  */
-const findAnnualMax = function (data) {
+const findHighestMonthly = function (data) {
   try {
     let max = Number.MIN_VALUE;
 
