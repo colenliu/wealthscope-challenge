@@ -30,7 +30,8 @@ const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
 /**
  * Generates a stock report CSV file that illustrates highest monthly return
- * OR maximum draw-up for each company in each year given a valid CSV file.
+ * OR maximum draw-up (maximum profit from buying and selling stock) for each
+ * company in each year given a valid CSV file.
  * @param {String} csvData path for CSV file from which to import data from
  * @param {String} reportType desired report for generated CSV (annual = highest monthly,
  * drawup = maximum drawups)
@@ -127,7 +128,7 @@ const generateStockReport = function (csvData, reportType) {
           .then(() => console.log("CSV file created successfully!"));
       });
   } catch (err) {
-    console.log("Error: generateStockReport() has failed to run.");
+    console.log("Error: Failed to generate stock report.");
     return;
   }
 };
@@ -147,13 +148,14 @@ const findAnnualMax = function (data) {
 
     return max;
   } catch (err) {
-    console.log("Error: findAnnualMax() has failed to run.");
+    console.log("Error: Failed to find highest monthly return.");
     return;
   }
 };
 
 /**
- * Helper function to find the maximum draw-up for a company in a given year.
+ * Helper function to find the maximum draw-up (maximum profit
+ * from buying and then selling stock) for a company in a given year.
  * @param {Object} data stock data for specific company and year
  * @returns highest maximum draw-up
  */
@@ -173,7 +175,7 @@ const findDrawUp = function (data) {
 
     return max.toFixed(4);
   } catch (err) {
-    console.log("findDrawUp() has failed to run.");
+    console.log("Error: Failed to find maximum draw-up.");
     return;
   }
 };
