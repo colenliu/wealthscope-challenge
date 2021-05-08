@@ -70,12 +70,15 @@ const generateStockReport = function (csvData, reportType) {
 
         // group data by company and year
         for (x = 0; x < companyYearCombos.length; x++) {
-          let newTicker = JSON.stringify(companyYearCombos[x]).substring(1, 5);
-          let newDate = JSON.stringify(companyYearCombos[x]).substring(5, 9);
+          let tickerFilter = JSON.stringify(companyYearCombos[x]).substring(
+            1,
+            5
+          );
+          let dateFilter = JSON.stringify(companyYearCombos[x]).substring(5, 9);
           let filteredCompanyYear = fileData.filter((v) => {
             return (
-              v["ticker"] === `${newTicker}` &&
-              v[`date`].substring(0, 4) === `${newDate}`
+              v["ticker"] === `${tickerFilter}` &&
+              v[`date`].substring(0, 4) === `${dateFilter}`
             );
           });
 
