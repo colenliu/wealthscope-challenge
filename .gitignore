@@ -1,3 +1,4 @@
 node_modules/
 max_annual.csv
 max_drawups.csv
+.DS_Store
