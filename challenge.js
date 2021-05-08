@@ -54,7 +54,7 @@ const csvWriterDrawUp = createCsvWriter({
  */
 const highestAnnual = function (csvData) {
   const fileData = [];
-  let unformattedData = {};
+  let unformattedAnnuals = {};
   let seperatedDataArray = [];
 
   fs.createReadStream(csvData)
@@ -94,22 +94,25 @@ const highestAnnual = function (csvData) {
           let ticker = seperatedDataArray[i][j][`ticker`];
           let year = seperatedDataArray[i][j][`date`].substring(0, 4);
 
-          if (!unformattedData.hasOwnProperty(`${ticker}${year}`)) {
-            unformattedData[`${ticker}${year}`] = allMaxes[i];
+          if (!unformattedAnnuals.hasOwnProperty(`${ticker}${year}`)) {
+            unformattedAnnuals[`${ticker}${year}`] = allMaxes[i];
           }
         }
       }
 
       // fix formatting of data to be written into CSV file
-      let formattedData = Object.keys(unformattedData).reduce((acc, curr) => {
-        let name = JSON.stringify(curr).substring(1, 5);
-        let year = JSON.stringify(curr).substring(5, 9);
+      let formattedData = Object.keys(unformattedAnnuals).reduce(
+        (acc, curr) => {
+          let name = JSON.stringify(curr).substring(1, 5);
+          let year = JSON.stringify(curr).substring(5, 9);
 
-        return [
-          ...acc,
-          { name: name, year: year, price: unformattedData[curr] },
-        ];
-      }, []);
+          return [
+            ...acc,
+            { name: name, year: year, price: unformattedAnnuals[curr] },
+          ];
+        },
+        []
+      );
 
       // write into CSV file
       csvWriterAnnual
@@ -126,7 +129,7 @@ const highestAnnual = function (csvData) {
  */
 const highestDrawUp = function (csvData) {
   const fileData = [];
-  let unformattedData = {};
+  let unformattedDrawUps = {};
   let seperatedDataArray = [];
 
   fs.createReadStream(csvData)
@@ -166,22 +169,25 @@ const highestDrawUp = function (csvData) {
           let ticker = seperatedDataArray[i][j][`ticker`];
           let year = seperatedDataArray[i][j][`date`].substring(0, 4);
 
-          if (!unformattedData.hasOwnProperty(`${ticker}${year}`)) {
-            unformattedData[`${ticker}${year}`] = allMaxes[i];
+          if (!unformattedDrawUps.hasOwnProperty(`${ticker}${year}`)) {
+            unformattedDrawUps[`${ticker}${year}`] = allMaxes[i];
           }
         }
       }
 
       // fix formatting of data to be written into CSV file
-      let formattedData = Object.keys(unformattedData).reduce((acc, curr) => {
-        let name = JSON.stringify(curr).substring(1, 5);
-        let year = JSON.stringify(curr).substring(5, 9);
+      let formattedData = Object.keys(unformattedDrawUps).reduce(
+        (acc, curr) => {
+          let name = JSON.stringify(curr).substring(1, 5);
+          let year = JSON.stringify(curr).substring(5, 9);
 
-        return [
-          ...acc,
-          { name: name, year: year, price: unformattedData[curr] },
-        ];
-      }, []);
+          return [
+            ...acc,
+            { name: name, year: year, price: unformattedDrawUps[curr] },
+          ];
+        },
+        []
+      );
 
       // write into CSV file
       csvWriterDrawUp
