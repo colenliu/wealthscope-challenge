@@ -29,9 +29,9 @@ const fs = require("fs");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
 /**
- * Generates a CSV file that illustrates highest monthly return
- * for each company in each year or maximum draw-up for each company in given year.
- * @param {String} csvData path for CSV file from which to import data from.
+ * Generates a stock report CSV file that illustrates highest monthly return
+ * OR maximum draw-up for each company in each year.
+ * @param {String} csvData path for CSV file from which to import data from
  * @param {String} reportType desired report for generated CSV (annual = highest monthly,
  * drawup = maximum drawups)
  */
