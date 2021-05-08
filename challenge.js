@@ -42,7 +42,7 @@ const HEADER_TEMPLATE = [
  * @param {String} reportType desired report for generated CSV (annual = highest monthly,
  * drawup = maximum drawups)
  */
-const highestGeneric = function (csvData, reportType) {
+const generateStockReport = function (csvData, reportType) {
   const fileData = [];
   let unformattedAnnuals = {};
   let filteredCompanyData = [];
@@ -161,6 +161,5 @@ const findDrawUp = function (data) {
 };
 
 // run functions
-highestGeneric("test_returns.csv", "annual");
-highestGeneric("test_returns.csv", "drawup");
-highestGeneric("test_returns.csv");
+generateStockReport("test_returns.csv", "annual");
+generateStockReport("test_returns.csv", "drawup");
