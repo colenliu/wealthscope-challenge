@@ -55,7 +55,7 @@ const csvWriterDrawUp = createCsvWriter({
 const highestAnnual = function (csvData) {
   const fileData = [];
   let unformattedAnnuals = {};
-  let seperatedDataArray = [];
+  let filteredCompanyData = [];
 
   fs.createReadStream(csvData)
     .pipe(csv())
@@ -74,25 +74,25 @@ const highestAnnual = function (csvData) {
       for (x = 0; x < unique.length; x++) {
         let newTicker = JSON.stringify(unique[x]).substring(1, 5);
         let newDate = JSON.stringify(unique[x]).substring(5, 9);
-        let filteredData = fileData.filter(function (v, i) {
+        let filteredCompanyYear = fileData.filter(function (v, i) {
           return (
             v["ticker"] == `${newTicker}` &&
             v[`date`].substring(0, 4) == `${newDate}`
           );
         });
 
-        seperatedDataArray.push(filteredData);
+        filteredCompanyData.push(filteredCompanyYear);
       }
 
       // pushes max for each company and year into array
       let allMaxes = [];
 
-      for (let i = 0; i < seperatedDataArray.length; i++) {
-        allMaxes.push(findAnnualMax(seperatedDataArray[i]));
+      for (let i = 0; i < filteredCompanyData.length; i++) {
+        allMaxes.push(findAnnualMax(filteredCompanyData[i]));
 
-        for (let j = 0; j < seperatedDataArray[i].length; j++) {
-          let ticker = seperatedDataArray[i][j][`ticker`];
-          let year = seperatedDataArray[i][j][`date`].substring(0, 4);
+        for (let j = 0; j < filteredCompanyData[i].length; j++) {
+          let ticker = filteredCompanyData[i][j][`ticker`];
+          let year = filteredCompanyData[i][j][`date`].substring(0, 4);
 
           if (!unformattedAnnuals.hasOwnProperty(`${ticker}${year}`)) {
             unformattedAnnuals[`${ticker}${year}`] = allMaxes[i];
@@ -130,7 +130,7 @@ const highestAnnual = function (csvData) {
 const highestDrawUp = function (csvData) {
   const fileData = [];
   let unformattedDrawUps = {};
-  let seperatedDataArray = [];
+  let filteredCompanyData = [];
 
   fs.createReadStream(csvData)
     .pipe(csv())
@@ -149,25 +149,25 @@ const highestDrawUp = function (csvData) {
       for (x = 0; x < unique.length; x++) {
         let newTicker = JSON.stringify(unique[x]).substring(1, 5);
         let newDate = JSON.stringify(unique[x]).substring(5, 9);
-        let filteredData = fileData.filter(function (v, i) {
+        let filteredCompanyYear = fileData.filter(function (v, i) {
           return (
             v["ticker"] == `${newTicker}` &&
             v[`date`].substring(0, 4) == `${newDate}`
           );
         });
 
-        seperatedDataArray.push(filteredData);
+        filteredCompanyData.push(filteredCompanyYear);
       }
 
       // pushes max for each company and year into array
       let allMaxes = [];
 
-      for (let i = 0; i < seperatedDataArray.length; i++) {
-        allMaxes.push(findDrawUp(seperatedDataArray[i]));
+      for (let i = 0; i < filteredCompanyData.length; i++) {
+        allMaxes.push(findDrawUp(filteredCompanyData[i]));
 
-        for (let j = 0; j < seperatedDataArray[i].length; j++) {
-          let ticker = seperatedDataArray[i][j][`ticker`];
-          let year = seperatedDataArray[i][j][`date`].substring(0, 4);
+        for (let j = 0; j < filteredCompanyData[i].length; j++) {
+          let ticker = filteredCompanyData[i][j][`ticker`];
+          let year = filteredCompanyData[i][j][`date`].substring(0, 4);
 
           if (!unformattedDrawUps.hasOwnProperty(`${ticker}${year}`)) {
             unformattedDrawUps[`${ticker}${year}`] = allMaxes[i];
