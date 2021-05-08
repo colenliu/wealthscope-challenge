@@ -83,6 +83,7 @@ const generateStockReport = function (csvData, reportType) {
             ? allMaxes.push(findAnnualMax(groupedCompanyData[i]))
             : allMaxes.push(findDrawUp(groupedCompanyData[i]));
 
+          // creates object containing desired company name, year, and desired max value
           for (let j = 0; j < groupedCompanyData[i].length; j++) {
             let ticker = groupedCompanyData[i][j][`ticker`];
             let year = groupedCompanyData[i][j][`date`].substring(0, 4);
@@ -137,13 +138,18 @@ const generateStockReport = function (csvData, reportType) {
  * @returns highest monthly return
  */
 const findAnnualMax = function (data) {
-  let max = Number.MIN_VALUE;
+  try {
+    let max = Number.MIN_VALUE;
 
-  for (let i = 0; i < data.length; i++) {
-    max = Math.max(max, data[i][`monthly_return`]);
+    for (let i = 0; i < data.length; i++) {
+      max = Math.max(max, data[i][`monthly_return`]);
+    }
+
+    return max;
+  } catch (err) {
+    console.log("Error: findAnnualMax() has failed to run.");
+    return;
   }
-
-  return max;
 };
 
 /**
@@ -152,19 +158,24 @@ const findAnnualMax = function (data) {
  * @returns highest maximum draw-up
  */
 const findDrawUp = function (data) {
-  let max = 0;
-  let min = Number.MAX_VALUE;
+  try {
+    let max = 0;
+    let min = Number.MAX_VALUE;
 
-  for (let i = 0; i < data.length; i++) {
-    let monthly = data[i][`monthly_return`];
-    if (monthly < min) {
-      min = monthly;
-    } else {
-      max = Math.max(max, monthly - min);
+    for (let i = 0; i < data.length; i++) {
+      let monthly = data[i][`monthly_return`];
+      if (monthly < min) {
+        min = monthly;
+      } else {
+        max = Math.max(max, monthly - min);
+      }
     }
-  }
 
-  return max.toFixed(4);
+    return max.toFixed(4);
+  } catch (err) {
+    console.log("findDrawUp() has failed to run.");
+    return;
+  }
 };
 
 // run functions
