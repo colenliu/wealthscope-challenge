@@ -1,7 +1,8 @@
 # wealthscope-challenge
-A technical challenge from WealthScope.
+A technical challenge from WealthScope solved using JavaScript (Node.js).
 
 ### HOW TO RUN:
+(Note: `Node.js` and `npm` must be installed for code to work)
 1. In the project root directory, input the following command on a terminal to install necessary packages:
 ```
 npm install
