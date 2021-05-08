@@ -35,29 +35,23 @@ const HEADER_TEMPLATE = [
   { id: "price", title: "Price" },
 ];
 
-// CSV writer for highest monthly return
-const csvWriterAnnual = createCsvWriter({
-  path: "max_annual.csv",
-  header: HEADER_TEMPLATE,
-});
-
-// CSV writer for maximum draw-up
-const csvWriterDrawUp = createCsvWriter({
-  path: "max_drawups.csv",
-  header: HEADER_TEMPLATE,
-});
-
 /**
  * Generates a CSV file that illustrates highest monthly return
  * for each company in each year or maximum draw-up for each company in given year.
  * @param {String} csvData path for CSV file from which to import data from.
- * @param {String} type desired type for generated CSV (annual = highest monthly,
+ * @param {String} reportType desired report for generated CSV (annual = highest monthly,
  * drawup = maximum drawups)
  */
-const highestGeneric = function (csvData, type) {
+const highestGeneric = function (csvData, reportType) {
   const fileData = [];
   let unformattedAnnuals = {};
   let filteredCompanyData = [];
+
+  // handle errors
+  if (!reportType || (reportType !== "annual" && reportType !== "drawup")) {
+    console.log("Please provide valid reportType parameter.");
+    return;
+  }
 
   fs.createReadStream(csvData)
     .pipe(csv())
@@ -90,11 +84,9 @@ const highestGeneric = function (csvData, type) {
       let allMaxes = [];
 
       for (let i = 0; i < filteredCompanyData.length; i++) {
-        if (type === "annual")
-          allMaxes.push(findAnnualMax(filteredCompanyData[i]));
-
-        if (type === "drawup")
-          allMaxes.push(findDrawUp(filteredCompanyData[i]));
+        reportType === "annual"
+          ? allMaxes.push(findAnnualMax(filteredCompanyData[i]))
+          : allMaxes.push(findDrawUp(filteredCompanyData[i]));
 
         for (let j = 0; j < filteredCompanyData[i].length; j++) {
           let ticker = filteredCompanyData[i][j][`ticker`];
@@ -122,7 +114,9 @@ const highestGeneric = function (csvData, type) {
 
       // write into corresponding CSV files
       createCsvWriter({
-        path: `${type === "annual" ? "max_annual.csv" : "max_drawups.csv"}`,
+        path: `${
+          reportType === "annual" ? "max_annual.csv" : "max_drawups.csv"
+        }`,
         header: HEADER_TEMPLATE,
       })
         .writeRecords(formattedAnnuals)
@@ -169,3 +163,4 @@ const findDrawUp = function (data) {
 // run functions
 highestGeneric("test_returns.csv", "annual");
 highestGeneric("test_returns.csv", "drawup");
+highestGeneric("test_returns.csv");
