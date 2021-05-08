@@ -53,18 +53,18 @@ const csvWriterDrawUp = createCsvWriter({
  * @param {string} csvData path for CSV file from which to import data from.
  */
 const highestAnnual = function (csvData) {
-  const results = [];
-  let obj = {};
+  const fileData = [];
+  let unformattedData = {};
   let arr = [];
 
   fs.createReadStream(csvData)
     .pipe(csv())
-    .on("data", (data) => results.push(data))
+    .on("data", (data) => fileData.push(data))
     .on("end", () => {
       // constant for all unique company and year combinations
       const unique = [
         ...new Set(
-          results.map(
+          fileData.map(
             (result) => result[`ticker`] + result[`date`].substring(0, 4)
           )
         ),
@@ -74,14 +74,14 @@ const highestAnnual = function (csvData) {
       for (x = 0; x < unique.length; x++) {
         let newTicker = JSON.stringify(unique[x]).substring(1, 5);
         let newDate = JSON.stringify(unique[x]).substring(5, 9);
-        let test2 = results.filter(function (v, i) {
+        let filteredData = fileData.filter(function (v, i) {
           return (
             v["ticker"] == `${newTicker}` &&
             v[`date`].substring(0, 4) == `${newDate}`
           );
         });
 
-        arr.push(test2);
+        arr.push(filteredData);
       }
 
       // pushes max for each company and year into array
@@ -94,23 +94,26 @@ const highestAnnual = function (csvData) {
           let ticker = arr[i][j][`ticker`];
           let year = arr[i][j][`date`].substring(0, 4);
 
-          if (!obj.hasOwnProperty(`${ticker}${year}`)) {
-            obj[`${ticker}${year}`] = allMaxes[i];
+          if (!unformattedData.hasOwnProperty(`${ticker}${year}`)) {
+            unformattedData[`${ticker}${year}`] = allMaxes[i];
           }
         }
       }
 
       // fix formatting of data to be written into CSV file
-      let newObj = Object.keys(obj).reduce((acc, curr) => {
+      let formattedData = Object.keys(unformattedData).reduce((acc, curr) => {
         let name = JSON.stringify(curr).substring(1, 5);
         let year = JSON.stringify(curr).substring(5, 9);
 
-        return [...acc, { name: name, year: year, price: obj[curr] }];
+        return [
+          ...acc,
+          { name: name, year: year, price: unformattedData[curr] },
+        ];
       }, []);
 
       // write into CSV file
       csvWriterAnnual
-        .writeRecords(newObj)
+        .writeRecords(formattedData)
         .then(() => console.log("max_annual.csv file created successfully!"));
     });
 };
@@ -122,18 +125,18 @@ const highestAnnual = function (csvData) {
  * @param {string} csvData path for CSV file from which to import data from.
  */
 const highestDrawUp = function (csvData) {
-  const results = [];
-  let obj = {};
+  const fileData = [];
+  let unformattedData = {};
   let arr = [];
 
   fs.createReadStream(csvData)
     .pipe(csv())
-    .on("data", (data) => results.push(data))
+    .on("data", (data) => fileData.push(data))
     .on("end", () => {
       // constant for all unique company and year combinations
       const unique = [
         ...new Set(
-          results.map(
+          fileData.map(
             (result) => result[`ticker`] + result[`date`].substring(0, 4)
           )
         ),
@@ -143,14 +146,14 @@ const highestDrawUp = function (csvData) {
       for (x = 0; x < unique.length; x++) {
         let newTicker = JSON.stringify(unique[x]).substring(1, 5);
         let newDate = JSON.stringify(unique[x]).substring(5, 9);
-        let test2 = results.filter(function (v, i) {
+        let filteredData = fileData.filter(function (v, i) {
           return (
             v["ticker"] == `${newTicker}` &&
             v[`date`].substring(0, 4) == `${newDate}`
           );
         });
 
-        arr.push(test2);
+        arr.push(filteredData);
       }
 
       // pushes max for each company and year into array
@@ -163,23 +166,26 @@ const highestDrawUp = function (csvData) {
           let ticker = arr[i][j][`ticker`];
           let year = arr[i][j][`date`].substring(0, 4);
 
-          if (!obj.hasOwnProperty(`${ticker}${year}`)) {
-            obj[`${ticker}${year}`] = allMaxes[i];
+          if (!unformattedData.hasOwnProperty(`${ticker}${year}`)) {
+            unformattedData[`${ticker}${year}`] = allMaxes[i];
           }
         }
       }
 
       // fix formatting of data to be written into CSV file
-      let newObj = Object.keys(obj).reduce((acc, curr) => {
+      let formattedData = Object.keys(unformattedData).reduce((acc, curr) => {
         let name = JSON.stringify(curr).substring(1, 5);
         let year = JSON.stringify(curr).substring(5, 9);
 
-        return [...acc, { name: name, year: year, price: obj[curr] }];
+        return [
+          ...acc,
+          { name: name, year: year, price: unformattedData[curr] },
+        ];
       }, []);
 
       // write into CSV file
       csvWriterDrawUp
-        .writeRecords(newObj)
+        .writeRecords(formattedData)
         .then(() => console.log("max_drawups.csv file created successfully!"));
     });
 };
