@@ -55,7 +55,7 @@ const csvWriterDrawUp = createCsvWriter({
 const highestAnnual = function (csvData) {
   const fileData = [];
   let unformattedData = {};
-  let arr = [];
+  let seperatedDataArray = [];
 
   fs.createReadStream(csvData)
     .pipe(csv())
@@ -81,18 +81,18 @@ const highestAnnual = function (csvData) {
           );
         });
 
-        arr.push(filteredData);
+        seperatedDataArray.push(filteredData);
       }
 
       // pushes max for each company and year into array
       let allMaxes = [];
 
-      for (let i = 0; i < arr.length; i++) {
-        allMaxes.push(findAnnualMax(arr[i]));
+      for (let i = 0; i < seperatedDataArray.length; i++) {
+        allMaxes.push(findAnnualMax(seperatedDataArray[i]));
 
-        for (let j = 0; j < arr[i].length; j++) {
-          let ticker = arr[i][j][`ticker`];
-          let year = arr[i][j][`date`].substring(0, 4);
+        for (let j = 0; j < seperatedDataArray[i].length; j++) {
+          let ticker = seperatedDataArray[i][j][`ticker`];
+          let year = seperatedDataArray[i][j][`date`].substring(0, 4);
 
           if (!unformattedData.hasOwnProperty(`${ticker}${year}`)) {
             unformattedData[`${ticker}${year}`] = allMaxes[i];
@@ -127,7 +127,7 @@ const highestAnnual = function (csvData) {
 const highestDrawUp = function (csvData) {
   const fileData = [];
   let unformattedData = {};
-  let arr = [];
+  let seperatedDataArray = [];
 
   fs.createReadStream(csvData)
     .pipe(csv())
@@ -153,18 +153,18 @@ const highestDrawUp = function (csvData) {
           );
         });
 
-        arr.push(filteredData);
+        seperatedDataArray.push(filteredData);
       }
 
       // pushes max for each company and year into array
       let allMaxes = [];
 
-      for (let i = 0; i < arr.length; i++) {
-        allMaxes.push(findDrawUp(arr[i]));
+      for (let i = 0; i < seperatedDataArray.length; i++) {
+        allMaxes.push(findDrawUp(seperatedDataArray[i]));
 
-        for (let j = 0; j < arr[i].length; j++) {
-          let ticker = arr[i][j][`ticker`];
-          let year = arr[i][j][`date`].substring(0, 4);
+        for (let j = 0; j < seperatedDataArray[i].length; j++) {
+          let ticker = seperatedDataArray[i][j][`ticker`];
+          let year = seperatedDataArray[i][j][`date`].substring(0, 4);
 
           if (!unformattedData.hasOwnProperty(`${ticker}${year}`)) {
             unformattedData[`${ticker}${year}`] = allMaxes[i];
