@@ -39,12 +39,18 @@ const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const generateStockReport = function (csvData, reportType) {
   try {
     const fileData = [];
-    let unformattedStockData = {};
     let groupedCompanyData = [];
+    let unformattedStockData = {};
 
-    // handle error cases (incorrect/missing reportType param)
-    if (!reportType || (reportType !== "annual" && reportType !== "drawup")) {
-      console.log("Error: Please provide valid reportType parameter.");
+    // handle error cases (missing CSV file, incorrect/missing reportType param)
+    if (
+      !csvData ||
+      !reportType ||
+      (reportType !== "annual" && reportType !== "drawup")
+    ) {
+      console.log(
+        "Error: Please make sure valid CSV file and reportType param is valid"
+      );
       return;
     }
 
